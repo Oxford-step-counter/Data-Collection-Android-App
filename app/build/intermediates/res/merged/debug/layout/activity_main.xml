@@ -27,7 +27,12 @@
         android:id = "@+id/send_collected_data_button"
         android:layout_width = "match_parent"
         android:layout_height = "wrap_content"
-        android:text = "Send Collection Data"
+        android:text = "Send Collected Data"
         />
 
+    <TextView
+        android:layout_width = "match_parent"
+        android:layout_height = "wrap_content"
+        android:text = "Instructions:\n1. Tap Start Data Collection to begin accelerometer data collection, you may leave this application running in the background. Collection will continue.\n2. When sufficient data has been collected, tap the stop data collection service button.\n3. When you stop data collection, Send Collected Data becomes available.\n4. Select this to send data via email. DO NOT EDIT ANY OF THE BODY TEXT.\n5. Email to jamiebrynes7@gmail.com"
+        />
 </LinearLayout>

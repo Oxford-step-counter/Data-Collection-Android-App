@@ -74,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
                 {
                     startActivity(i);
                 }
+
+                mSendDataButton.setEnabled(false);
             }
         });
 

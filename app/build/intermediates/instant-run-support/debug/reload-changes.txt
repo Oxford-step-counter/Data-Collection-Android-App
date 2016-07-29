@@ -1,0 +1,4 @@
+CHANGED,C:\Users\Jamie Brynes\Documents\workspace\4yp-data-collection\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\jamie\android\a4ypdatacollection\MainActivity$override.class
+CHANGED,C:\Users\Jamie Brynes\Documents\workspace\4yp-data-collection\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\jamie\android\a4ypdatacollection\MainActivity$3$override.class
+CHANGED,C:\Users\Jamie Brynes\Documents\workspace\4yp-data-collection\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\android\tools\fd\runtime\AppPatchesLoaderImpl.class
+CHANGED,C:\Users\Jamie Brynes\Documents\workspace\4yp-data-collection\app\build\intermediates\transforms\instantRun\debug\folders\4000\5\enhanced\com\jamie\android\a4ypdatacollection\MainActivity$Receiver$override.class

@@ -4,47 +4,39 @@
     api-level="22"
     density="xxxhdpi"
     format="7"
-    timestamp="1377983420671393"
-    verifier="COMPATIBLE" >
+    timestamp="1381875696593622" >
 
     <task
         name="javac"
-        duration="450" />
+        duration="1643" />
     <task
         name="instant-run-dex"
-        duration="421" />
+        duration="0" />
     <task
         name="instant-run-transform"
-        duration="30" />
+        duration="455" />
     <task
         name="verifier"
-        duration="7" />
+        duration="129" />
 
     <artifact
-        location="C:\Users\Jamie Brynes\Documents\workspace\4yp-data-collection\app\build\intermediates\reload-dex\debug\classes.dex"
-        type="RELOAD_DEX" />
+        location="C:\Users\Jamie Brynes\Documents\workspace\4yp-data-collection\app\build\intermediates\transforms\dex\debug\folders\1000\5\slice_8\classes.dex"
+        type="DEX" />
 
-    <build timestamp="1375528765377806" >
+    <build timestamp="1381730467875640" >
         <artifact
             location="C:\Users\Jamie Brynes\Documents\workspace\4yp-data-collection\app\build\outputs\apk\app-debug.apk"
             type="MAIN" />
     </build>
-    <build timestamp="1375883731175794" >
+    <build timestamp="1381815456062952" >
         <artifact
             location="C:\Users\Jamie Brynes\Documents\workspace\4yp-data-collection\app\build\intermediates\res\resources-debug.ap_"
             type="RESOURCES" />
     </build>
-    <build timestamp="1377926478073822" >
+    <build timestamp="1381875696593622" >
         <artifact
             location="C:\Users\Jamie Brynes\Documents\workspace\4yp-data-collection\app\build\intermediates\transforms\dex\debug\folders\1000\5\slice_8\classes.dex"
             type="DEX" />
-    </build>
-    <build
-        timestamp="1377983420671393"
-        verifier="COMPATIBLE" >
-        <artifact
-            location="C:\Users\Jamie Brynes\Documents\workspace\4yp-data-collection\app\build\intermediates\reload-dex\debug\classes.dex"
-            type="RELOAD_DEX" />
     </build>
 
 </instant-run>
