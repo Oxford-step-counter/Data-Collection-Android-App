@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<instant-run
+    abi="armeabi-v7a,armeabi"
+    api-level="22"
+    density="xxxhdpi"
+    format="7"
+    timestamp="1377983420671393"
+    verifier="COMPATIBLE" >
+
+    <task
+        name="javac"
+        duration="450" />
+    <task
+        name="instant-run-dex"
+        duration="421" />
+    <task
+        name="instant-run-transform"
+        duration="30" />
+    <task
+        name="verifier"
+        duration="7" />
+
+    <artifact
+        location="C:\Users\Jamie Brynes\Documents\workspace\4yp-data-collection\app\build\intermediates\reload-dex\debug\classes.dex"
+        type="RELOAD_DEX" />
+
+    <build timestamp="1375528765377806" >
+        <artifact
+            location="C:\Users\Jamie Brynes\Documents\workspace\4yp-data-collection\app\build\outputs\apk\app-debug.apk"
+            type="MAIN" />
+    </build>
+    <build timestamp="1375883731175794" >
+        <artifact
+            location="C:\Users\Jamie Brynes\Documents\workspace\4yp-data-collection\app\build\intermediates\res\resources-debug.ap_"
+            type="RESOURCES" />
+    </build>
+    <build timestamp="1377926478073822" >
+        <artifact
+            location="C:\Users\Jamie Brynes\Documents\workspace\4yp-data-collection\app\build\intermediates\transforms\dex\debug\folders\1000\5\slice_8\classes.dex"
+            type="DEX" />
+    </build>
+    <build
+        timestamp="1377983420671393"
+        verifier="COMPATIBLE" >
+        <artifact
+            location="C:\Users\Jamie Brynes\Documents\workspace\4yp-data-collection\app\build\intermediates\reload-dex\debug\classes.dex"
+            type="RELOAD_DEX" />
+    </build>
+
+</instant-run>
