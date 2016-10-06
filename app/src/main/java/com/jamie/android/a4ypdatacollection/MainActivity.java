@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private static int FILE_PERMISSIONS_CALLBACK = 1;
     private static final String[] FILE_PERMISSIONS = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
     private static final String LOG = "MainActivity";
-    private static final String SERVER_URL = "http://jamiebrynes.com/php/upload_4yp_data.php";
+    private static final String SERVER_URL = Server_Details.SERVER_URL;
 
 
     @Override
