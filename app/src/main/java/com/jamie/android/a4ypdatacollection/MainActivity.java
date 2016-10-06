@@ -1,20 +1,25 @@
 package com.jamie.android.a4ypdatacollection;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.os.AsyncTaskCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,8 +39,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static int FILE_PERMISSIONS_CALLBACK = 1;
     private static final String[] FILE_PERMISSIONS = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
     private static final String LOG = "MainActivity";
+    private static final String SERVER_URL = "http://jamiebrynes.com/php/upload_4yp_data.php";
 
 
     @Override
@@ -69,35 +74,33 @@ public class MainActivity extends AppCompatActivity {
             k++;
         }
 
-        //Create logger object.
-        try {
-            mLogger = new SensorLogger(this, sensors);
-        } catch (IOException e) {
-            Log.e(LOG, "Cannot create SensorLogger object.");
-        }
-
-
         //Wire up start data collection button
         mStartCollectionButton = (Button) findViewById(R.id.start_service_button);
         mStartCollectionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mLogger.start();
-                if (mSendDataButton.isEnabled()) {
-                    mSendDataButton.setEnabled(false);
+                mStopCollectionButton.setEnabled(true);
+                mStartCollectionButton.setEnabled(false);
+                try {
+                    mLogger = new SensorLogger(MainActivity.this, sensors);
+                } catch (IOException e) {
+                    Log.e(LOG, "Cannot create SensorLogger object.");
                 }
+                mLogger.start();
             }
         });
 
         //Wire up stop data collection button
         mStopCollectionButton = (Button) findViewById(R.id.stop_service_button);
+        mStopCollectionButton.setEnabled(false);
         mStopCollectionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mStartCollectionButton.setEnabled(true);
+                mStopCollectionButton.setEnabled(false);
+                mSendDataButton.setEnabled(true);
                 mLogger.stop();
-                if (!mSendDataButton.isEnabled()) {
-                    mSendDataButton.setEnabled(true);
-                }
+
             }
         });
 
@@ -107,29 +110,64 @@ public class MainActivity extends AppCompatActivity {
         mSendDataButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                /*
-                TODO: Zip files that exist in the directory together and send this via POST to PHP script on website.
-                */
+                //Create zip file.
                 File[] listOfFiles = filesDir.listFiles();
+                File zip = Utils.zip(Arrays.asList(listOfFiles), filesDir.getAbsolutePath() + "/data.zip");
 
-                File zip = new File(filesDir + "/data.zip");
-                try {
-                    Utils.compress(zip, listOfFiles);
-                    for (File f : listOfFiles) {
-                        f.delete();
-                    }
-                } catch (IOException e) {
-                    Log.d(LOG, e.toString());
+                //Remove csv files.
+                for (File f : listOfFiles) {
+                    f.delete();
                 }
-
                 Log.d(LOG, "Zip file created!");
+
+
+                //Upload file to server.
+                FileUpload fileUpload = new FileUpload();
+                fileUpload.execute(zip.getAbsolutePath());
+                resetState();
            }
         });
     }
 
     //Function to reset state --> create new Logger object.
     private void resetState() {
+
+        mSendDataButton.setEnabled(false);
+        mStartCollectionButton.setEnabled(true);
+        mStopCollectionButton.setEnabled(false);
+
+    }
+
+    private class FileUpload extends AsyncTask<String, Void, String> {
+
+        private ProgressDialog progressDialog;
+        private File file;
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            String fileURI = params[0];
+
+            file = new File(fileURI);
+            int serverReturnCode = Utils.uploadFile(file, SERVER_URL);
+
+            return "complete";
+        }
+
+        @Override
+        protected void onPreExecute() {
+
+            progressDialog = ProgressDialog.show(MainActivity.this,
+                    "File Upload",
+                    "Waiting for data collection to upload... ");
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            progressDialog.dismiss();
+            file.delete();
+        }
+
 
     }
 }
