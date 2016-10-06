@@ -25,14 +25,14 @@ public class MainActivity extends AppCompatActivity {
     private SensorManager sensorManager;
     private File filesDir;
 
-    private static int[] sensorTypes = {Sensor.TYPE_ACCELEROMETER,
+    private static final int[] sensorTypes = {Sensor.TYPE_ACCELEROMETER,
             Sensor.TYPE_GYROSCOPE,
             Sensor.TYPE_GRAVITY,
             Sensor.TYPE_ROTATION_VECTOR,
             Sensor.TYPE_MAGNETIC_FIELD};
 
-    private static final int FILE_PERMISSIONS_CALLBACK = 1;
-    private static String[] FILE_PERMISSIONS = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    private static int FILE_PERMISSIONS_CALLBACK = 1;
+    private static final String[] FILE_PERMISSIONS = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     private static final String LOG = "MainActivity";
 
@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             mLogger = new SensorLogger(this, sensors);
         } catch (IOException e) {
-            Log.e(MainActivity.class.getName(), "Cannot create SensorLogger object.");
+            Log.e(LOG, "Cannot create SensorLogger object.");
         }
 
 
@@ -106,6 +106,10 @@ public class MainActivity extends AppCompatActivity {
         mSendDataButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                /*
+                TODO: Zip files that exist in the directory together and send this via POST to PHP script on website.
+                */
                 File[] listOfFiles = filesDir.listFiles();
 
                 for (File f : listOfFiles) {
