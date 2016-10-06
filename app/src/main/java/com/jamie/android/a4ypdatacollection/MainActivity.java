@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Permissions for Android 6.0
+        //Permissions for Android >=6.0
         int permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (permission != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, FILE_PERMISSIONS, FILE_PERMISSIONS_CALLBACK);
@@ -112,19 +112,16 @@ public class MainActivity extends AppCompatActivity {
                 */
                 File[] listOfFiles = filesDir.listFiles();
 
-                for (File f : listOfFiles) {
-                    if (f.isFile()) {
-                        Log.d(MainActivity.class.getName(), "File: " + f.getName());
-                    } else {
-                        Log.d(MainActivity.class.getName(), "Directory: " + f.getName());
-                    }
+                File zip = new File(filesDir + "/data.zip");
+                try {
+
+                    Utils.compress(zip, listOfFiles);
+                } catch (IOException e) {
+                    Log.d(LOG, e.toString());
                 }
+
+                Log.d(LOG, "Zip file created!");
            }
-
         });
-
-
     }
-
-
 }
