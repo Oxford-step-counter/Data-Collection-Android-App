@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private SensorLogger mLogger;
     private SensorManager sensorManager;
     private File filesDir;
+    private String[] sensors;
 
     private static final int[] sensorTypes = {Sensor.TYPE_ACCELEROMETER,
             Sensor.TYPE_GYROSCOPE,
@@ -61,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         //Create String array based on mappings.
-        String[] sensors = new String[types.size()];
+        sensors = new String[types.size()];
         int k = 0;
         for (int i : types) {
             sensors[k] = Utils.mapSensorType(i);
@@ -114,8 +115,10 @@ public class MainActivity extends AppCompatActivity {
 
                 File zip = new File(filesDir + "/data.zip");
                 try {
-
                     Utils.compress(zip, listOfFiles);
+                    for (File f : listOfFiles) {
+                        f.delete();
+                    }
                 } catch (IOException e) {
                     Log.d(LOG, e.toString());
                 }
@@ -123,5 +126,10 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(LOG, "Zip file created!");
            }
         });
+    }
+
+    //Function to reset state --> create new Logger object.
+    private void resetState() {
+
     }
 }
