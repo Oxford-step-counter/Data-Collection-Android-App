@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">4YP Data Collection</string>
+    <string name="instructions">Instructions:\n1.Click Start Data Collection to begin data collection.\n2. When ready click Stop Data Collection to stop data collection.\n3. If satisfied with data collection, click Send Collected Data to upload data to server.</string>
 </resources>
