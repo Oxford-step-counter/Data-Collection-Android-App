@@ -7,10 +7,12 @@ import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.os.AsyncTaskCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -20,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -111,8 +114,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //Create zip file.
+
+                //Create name of zip: UUID + timestamp.
+                TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                Calendar c = Calendar.getInstance();
+                String zipName = tm.getDeviceId() + '.' + Utils.formatDate(c.getTime()) + ".zip";
+                Log.d(LOG, zipName);
+
                 File[] listOfFiles = filesDir.listFiles();
-                File zip = Utils.zip(Arrays.asList(listOfFiles), filesDir.getAbsolutePath() + "/data.zip");
+                File zip = Utils.zip(Arrays.asList(listOfFiles), filesDir.getAbsolutePath() + "/" + zipName);
 
                 //Remove csv files.
                 for (File f : listOfFiles) {

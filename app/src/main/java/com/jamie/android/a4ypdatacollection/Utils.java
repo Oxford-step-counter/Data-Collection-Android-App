@@ -13,6 +13,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -188,5 +190,21 @@ public class Utils {
             System.err.println(ex.getMessage());
         }
         return null;
+    }
+
+    public static String formatDate(Date d) {
+        String output = "";
+
+        Calendar c = Calendar.getInstance();
+        c.setTime(d);
+
+        output += Integer.toString(c.get(Calendar.DAY_OF_MONTH))
+                + '.' + Integer.toString(c.get(Calendar.MONTH) + 1)
+                + '.' + Integer.toString(c.get(Calendar.YEAR))
+                + '.' + Integer.toString(c.get(Calendar.HOUR))
+                + '.' + Integer.toString(c.get(Calendar.MINUTE))
+                + '.' + Integer.toString(c.get(Calendar.SECOND));
+
+        return output;
     }
 }
