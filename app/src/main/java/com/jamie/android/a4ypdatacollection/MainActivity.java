@@ -3,23 +3,27 @@ package com.jamie.android.a4ypdatacollection;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.os.AsyncTaskCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.EditText;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -29,10 +33,16 @@ public class MainActivity extends AppCompatActivity {
     private Button mStartCollectionButton;
     private Button mStopCollectionButton;
     private Button mSendDataButton;
+    private EditText mFirstNameEditText;
+    private EditText mLastNameEditTest;
+
     private SensorLogger mLogger;
     private SensorManager sensorManager;
     private File filesDir;
     private String[] sensors;
+
+    private String firstName;
+    private String lastName;
 
     private static final int[] sensorTypes = {Sensor.TYPE_ACCELEROMETER,
             Sensor.TYPE_GYROSCOPE,
@@ -44,12 +54,19 @@ public class MainActivity extends AppCompatActivity {
     private static final String[] FILE_PERMISSIONS = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
     private static final String LOG = "MainActivity";
     private static final String SERVER_URL = Server_Details.SERVER_URL;
-
+    private static final String SP_FIRST_NAME_KEY = "com.jamie.android.a4ypdatacollection.sp_first_name";
+    private static final String SP_LAST_NAME_KEY = "com.jamie.android.a4ypdatacollection.sp_last_name";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //Get name data.
+        SharedPreferences sp = getPreferences(MODE_PRIVATE);
+        firstName = sp.getString(SP_FIRST_NAME_KEY, "");
+        lastName = sp.getString(SP_LAST_NAME_KEY, "");
+
 
         //Permissions for Android >=6.0
         int permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -76,6 +93,60 @@ public class MainActivity extends AppCompatActivity {
             sensors[k] = Utils.mapSensorType(i);
             k++;
         }
+
+        mFirstNameEditText = (EditText) findViewById(R.id.first_name_edit_text);
+        mFirstNameEditText.setText(firstName);
+
+        mLastNameEditTest = (EditText) findViewById(R.id.last_name_edit_text);
+        mLastNameEditTest.setText(lastName);
+
+        mFirstNameEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                SharedPreferences sp = getPreferences(MODE_PRIVATE);
+                SharedPreferences.Editor editor = sp.edit();
+                editor.putString(SP_FIRST_NAME_KEY, s.toString());
+                editor.commit();
+                firstName = s.toString();
+                Log.d(LOG, lastName);
+            }
+        });
+
+        mLastNameEditTest.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                SharedPreferences sp = getPreferences(MODE_PRIVATE);
+                SharedPreferences.Editor editor = sp.edit();
+                editor.putString(SP_LAST_NAME_KEY, s.toString());
+                editor.commit();
+
+                lastName = s.toString();
+                Log.d(LOG, lastName);
+
+            }
+        });
 
         //Wire up start data collection button
         mStartCollectionButton = (Button) findViewById(R.id.start_service_button);
@@ -118,8 +189,10 @@ public class MainActivity extends AppCompatActivity {
                 //Create name of zip: UUID + timestamp.
                 TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                 Calendar c = Calendar.getInstance();
-                String zipName = tm.getDeviceId() + '.' + Utils.formatDate(c.getTime()) + ".zip";
+                String zipName = firstName + "." + lastName + '.' + Utils.formatDate(c.getTime()) + ".zip";
                 Log.d(LOG, zipName);
+
+                createMetadataFile(filesDir);
 
                 File[] listOfFiles = filesDir.listFiles();
                 File zip = Utils.zip(Arrays.asList(listOfFiles), filesDir.getAbsolutePath() + "/" + zipName);
@@ -146,6 +219,33 @@ public class MainActivity extends AppCompatActivity {
         mStartCollectionButton.setEnabled(true);
         mStopCollectionButton.setEnabled(false);
 
+    }
+
+    private void createMetadataFile(File filesDir) {
+
+        String output = "";
+        for (int type : sensorTypes) {
+            Sensor sensor;
+            if (sensorManager.getDefaultSensor(type) != null) {
+                sensor = sensorManager.getDefaultSensor(type);
+                String sensor_type = Utils.mapSensorType(type);
+                String sensor_name = sensor.getName();
+
+                output += sensor_type + " : " + sensor_name + "\n";
+            }
+        }
+
+        try {
+            File metaData = new File(filesDir + "/metadata.txt");
+            FileOutputStream outputStream = new FileOutputStream(metaData);
+            OutputStreamWriter out = new OutputStreamWriter(outputStream);
+            out.append(output);
+            out.flush();
+            out.close();
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private class FileUpload extends AsyncTask<String, Void, String> {
@@ -180,4 +280,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+
 }
