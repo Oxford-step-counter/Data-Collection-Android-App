@@ -163,7 +163,7 @@ public class SensorLogger {
                         for (int j = 0; j < event.values.length; j++) {
                             line += "," + event.values[j];
                         }
-                        line += "\n";
+                        line += "\r\n";
                         try {
                             out.append(line);
                         } catch (IOException ex) {
