@@ -44,11 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private String firstName;
     private String lastName;
 
-    private static final int[] sensorTypes = {Sensor.TYPE_ACCELEROMETER,
-            Sensor.TYPE_GYROSCOPE,
-            Sensor.TYPE_GRAVITY,
-            Sensor.TYPE_ROTATION_VECTOR,
-            Sensor.TYPE_MAGNETIC_FIELD};
+    private static final int[] sensorTypes = {Sensor.TYPE_ACCELEROMETER};
 
     private static int FILE_PERMISSIONS_CALLBACK = 1;
     private static final String[] FILE_PERMISSIONS = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
