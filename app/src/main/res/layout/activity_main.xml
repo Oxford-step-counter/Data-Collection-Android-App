@@ -41,7 +41,12 @@
             android:layout_height="wrap_content"
             android:id="@+id/last_name_edit_text"/>
     </LinearLayout>
-
+    <Button
+        android:id = "@+id/connect_bluetooth_button"
+        android:layout_width = "match_parent"
+        android:layout_height = "wrap_content"
+        android:text = "@string/connect_btn"
+        />
     <Button
         android:id = "@+id/start_service_button"
         android:layout_width = "match_parent"

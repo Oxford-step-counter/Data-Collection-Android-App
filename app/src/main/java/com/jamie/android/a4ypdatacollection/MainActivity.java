@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,8 +17,10 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,26 +31,32 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BluetoothModule.BluetoothModuleCallback{
 
     private Button mStartCollectionButton;
     private Button mStopCollectionButton;
     private Button mSendDataButton;
+    private Button mConnectButton;
     private EditText mFirstNameEditText;
     private EditText mLastNameEditTest;
 
     private SensorLogger mLogger;
     private SensorManager sensorManager;
+    private BluetoothModule mBtModule;
     private File filesDir;
     private String[] sensors;
 
     private String firstName;
     private String lastName;
 
+    private Handler mConnectedHandler;
+    private ProgressDialog mConnectedDialog;
+
     private static final int[] sensorTypes = {Sensor.TYPE_ACCELEROMETER};
 
     private static int FILE_PERMISSIONS_CALLBACK = 1;
     private static final String[] FILE_PERMISSIONS = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    private static final String[] BLUETOOTH_PERMISSIONS = {Manifest.permission.BLUETOOTH, Manifest.permission.ACCESS_COARSE_LOCATION};
     private static final String LOG = "MainActivity";
     private static final String SERVER_URL = Server_Details.SERVER_URL;
     private static final String SP_FIRST_NAME_KEY = "com.jamie.android.a4ypdatacollection.sp_first_name";
@@ -57,6 +66,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // Keep screen on.
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        mConnectedHandler = new Handler();
 
         //Get name data.
         SharedPreferences sp = getPreferences(MODE_PRIVATE);
@@ -64,15 +77,67 @@ public class MainActivity extends AppCompatActivity {
         lastName = sp.getString(SP_LAST_NAME_KEY, "");
 
 
+        getPermissions();
+
+        //Get application files directory.
+        filesDir = getExternalFilesDir(null);
+
+        mBtModule = new BluetoothModule(this, this);
+
+        setUpSensors();
+        setUpEditText();
+        setUpButtons();
+    }
+
+    //Function to reset state --> create new Logger object.
+    private void resetState() {
+
+        mSendDataButton.setEnabled(false);
+        mStartCollectionButton.setEnabled(true);
+        mStopCollectionButton.setEnabled(false);
+
+    }
+
+    private void createMetadataFile(File filesDir) {
+
+        String output = "";
+        for (int type : sensorTypes) {
+            Sensor sensor;
+            if (sensorManager.getDefaultSensor(type) != null) {
+                sensor = sensorManager.getDefaultSensor(type);
+                String sensor_type = Utils.mapSensorType(type);
+                String sensor_name = sensor.getName();
+
+                output += sensor_type + " : " + sensor_name + "\n";
+            }
+        }
+
+        try {
+            File metaData = new File(filesDir + "/metadata.txt");
+            FileOutputStream outputStream = new FileOutputStream(metaData);
+            OutputStreamWriter out = new OutputStreamWriter(outputStream);
+            out.append(output);
+            out.flush();
+            out.close();
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getPermissions() {
         //Permissions for Android >=6.0
         int permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (permission != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, FILE_PERMISSIONS, FILE_PERMISSIONS_CALLBACK);
         }
+        permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, BLUETOOTH_PERMISSIONS, FILE_PERMISSIONS_CALLBACK);
+        }
+    }
 
-        //Get application files directory.
-        filesDir = getExternalFilesDir(null);
-
+    private void setUpSensors(){
         //Create list of sensors.
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         ArrayList<Integer> types = new ArrayList<Integer>();
@@ -89,7 +154,9 @@ public class MainActivity extends AppCompatActivity {
             sensors[k] = Utils.mapSensorType(i);
             k++;
         }
+    }
 
+    private void setUpEditText() {
         mFirstNameEditText = (EditText) findViewById(R.id.first_name_edit_text);
         mFirstNameEditText.setText(firstName);
 
@@ -143,9 +210,12 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
 
+    private void setUpButtons() {
         //Wire up start data collection button
         mStartCollectionButton = (Button) findViewById(R.id.start_service_button);
+        mStartCollectionButton.setEnabled(false);
         mStartCollectionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.e(LOG, "Cannot create SensorLogger object.");
                 }
                 mLogger.start();
+                mBtModule.start();
             }
         });
 
@@ -170,6 +241,7 @@ public class MainActivity extends AppCompatActivity {
                 mStopCollectionButton.setEnabled(false);
                 mSendDataButton.setEnabled(true);
                 mLogger.stop();
+                mBtModule.stop();
 
             }
         });
@@ -204,44 +276,69 @@ public class MainActivity extends AppCompatActivity {
                 FileUpload fileUpload = new FileUpload();
                 fileUpload.execute(zip.getAbsolutePath());
                 resetState();
-           }
+            }
+        });
+
+        mConnectButton = (Button) findViewById(R.id.connect_bluetooth_button);
+        mConnectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mBtModule.getConnected()) {
+                    //Disconnect
+                    mBtModule.connect();
+
+                } else {
+                    //Connect bluetooth
+                    mBtModule.connect();
+
+                    //Kickoff a dialog
+                    mConnectedDialog = ProgressDialog.show(MainActivity.this, "Bluetooth Connecting", "Waiting for Bluetooth to connect...");
+
+                    //Runnable to dismiss dialog.
+                    mConnectedHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mBtModule.getConnecting()) {
+                                mConnectedHandler.postDelayed(this, 500);
+                            } else {
+                                mConnectedDialog.dismiss();
+                                if (!mBtModule.getConnected()) {
+                                    Toast toast = Toast.makeText(MainActivity.this, "Unable to connect", Toast.LENGTH_SHORT);
+                                    toast.show();
+                                } else {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mConnectButton.setText(R.string.disconnect_btn);
+                                            mStartCollectionButton.setEnabled(true);
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    });
+                }
+            }
         });
     }
 
-    //Function to reset state --> create new Logger object.
-    private void resetState() {
-
-        mSendDataButton.setEnabled(false);
-        mStartCollectionButton.setEnabled(true);
-        mStopCollectionButton.setEnabled(false);
-
-    }
-
-    private void createMetadataFile(File filesDir) {
-
-        String output = "";
-        for (int type : sensorTypes) {
-            Sensor sensor;
-            if (sensorManager.getDefaultSensor(type) != null) {
-                sensor = sensorManager.getDefaultSensor(type);
-                String sensor_type = Utils.mapSensorType(type);
-                String sensor_name = sensor.getName();
-
-                output += sensor_type + " : " + sensor_name + "\n";
+    @Override
+    public void onDisconnect() {
+        if (mLogger != null) {
+            mLogger.stop();
+        }
+        mBtModule.stop();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mConnectButton.setText(R.string.connect_btn);
+                mStartCollectionButton.setEnabled(false);
+                mStopCollectionButton.setEnabled(false);
+                mSendDataButton.setEnabled(false);
             }
-        }
-
-        try {
-            File metaData = new File(filesDir + "/metadata.txt");
-            FileOutputStream outputStream = new FileOutputStream(metaData);
-            OutputStreamWriter out = new OutputStreamWriter(outputStream);
-            out.append(output);
-            out.flush();
-            out.close();
-            outputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        });
+        Toast toast = Toast.makeText(this, "RFduino disconnected", Toast.LENGTH_SHORT);
+        toast.show();
     }
 
     private class FileUpload extends AsyncTask<String, Void, String> {
