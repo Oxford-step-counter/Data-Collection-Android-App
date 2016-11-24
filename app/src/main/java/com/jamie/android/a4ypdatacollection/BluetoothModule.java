@@ -120,6 +120,9 @@ public class BluetoothModule {
     private BluetoothAdapter.LeScanCallback handleScan = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice device, int i, byte[] bytes) {
+            if (device.getName() == null) {
+                return;
+            }
             Log.d(TAG, "Found BTLE device: " + device.getName());
             if (device.getName().equalsIgnoreCase(DEVICE_NAME)) {
                 mBluetoothAdapter.stopLeScan(handleScan);
@@ -169,6 +172,7 @@ public class BluetoothModule {
 
     private void setUpRead() {
 
+
         mReadState = new Runnable() {
             @Override
             public void run() {
@@ -182,6 +186,7 @@ public class BluetoothModule {
         };
 
         mReadHandler.post(mReadState);
+
     }
 
     private byte[] reverseArray(byte[] array) {
