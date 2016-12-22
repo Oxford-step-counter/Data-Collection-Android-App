@@ -23,7 +23,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -37,8 +36,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
     private Button mStopCollectionButton;
     private Button mSendDataButton;
     private Button mConnectButton;
-    private EditText mFirstNameEditText;
-    private EditText mLastNameEditTest;
+    private EditText mFileNameEditText;
 
     private SensorLogger mLogger;
     private SensorManager sensorManager;
@@ -46,8 +44,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
     private File filesDir;
     private String[] sensors;
 
-    private String firstName;
-    private String lastName;
+    private String fileName;
 
     private Handler mConnectedHandler;
     private ProgressDialog mConnectedDialog;
@@ -59,8 +56,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
     private static final String[] BLUETOOTH_PERMISSIONS = {Manifest.permission.BLUETOOTH, Manifest.permission.ACCESS_COARSE_LOCATION};
     private static final String LOG = "MainActivity";
     private static final String SERVER_URL = Server_Details.SERVER_URL;
-    private static final String SP_FIRST_NAME_KEY = "com.jamie.android.a4ypdatacollection.sp_first_name";
-    private static final String SP_LAST_NAME_KEY = "com.jamie.android.a4ypdatacollection.sp_last_name";
+    private static final String SP_FILE_NAME_KEY = "com.jamie.android.a4ypdatacollection.sp_first_name";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,8 +69,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
 
         //Get name data.
         SharedPreferences sp = getPreferences(MODE_PRIVATE);
-        firstName = sp.getString(SP_FIRST_NAME_KEY, "");
-        lastName = sp.getString(SP_LAST_NAME_KEY, "");
+        fileName = sp.getString(SP_FILE_NAME_KEY, "");
 
 
         getPermissions();
@@ -157,13 +152,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
     }
 
     private void setUpEditText() {
-        mFirstNameEditText = (EditText) findViewById(R.id.first_name_edit_text);
-        mFirstNameEditText.setText(firstName);
+        mFileNameEditText = (EditText) findViewById(R.id.file_name_edit_text);
+        mFileNameEditText.setText(fileName);
 
-        mLastNameEditTest = (EditText) findViewById(R.id.last_name_edit_text);
-        mLastNameEditTest.setText(lastName);
-
-        mFirstNameEditText.addTextChangedListener(new TextWatcher() {
+        mFileNameEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -179,37 +171,12 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
 
                 SharedPreferences sp = getPreferences(MODE_PRIVATE);
                 SharedPreferences.Editor editor = sp.edit();
-                editor.putString(SP_FIRST_NAME_KEY, s.toString());
+                editor.putString(SP_FILE_NAME_KEY, s.toString());
                 editor.commit();
-                firstName = s.toString();
-                Log.d(LOG, lastName);
+                fileName = s.toString();
             }
         });
 
-        mLastNameEditTest.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-                SharedPreferences sp = getPreferences(MODE_PRIVATE);
-                SharedPreferences.Editor editor = sp.edit();
-                editor.putString(SP_LAST_NAME_KEY, s.toString());
-                editor.commit();
-
-                lastName = s.toString();
-                Log.d(LOG, lastName);
-
-            }
-        });
     }
 
     private void setUpButtons() {
@@ -252,13 +219,11 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
         mSendDataButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Create zip file.
+
 
                 //Create name of zip: UUID + timestamp.
-                TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                 Calendar c = Calendar.getInstance();
-                String zipName = firstName + "." + lastName + '.' + Utils.formatDate(c.getTime()) + ".zip";
-                Log.d(LOG, zipName);
+                String zipName = fileName + "." + Utils.formatDate(c.getTime()) + ".zip";
 
                 createMetadataFile(filesDir);
 

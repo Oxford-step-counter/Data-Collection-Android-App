@@ -17,30 +17,15 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:text="First Name: "
+        android:text="File Name: "
         android:gravity="center"
         android:textSize="20dp"/>
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/first_name_edit_text"/>
+        android:id="@+id/file_name_edit_text"/>
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Last Name: "
-            android:gravity="center"
-            android:textSize="20dp"/>
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/last_name_edit_text"/>
-    </LinearLayout>
     <Button
         android:id = "@+id/connect_bluetooth_button"
         android:layout_width = "match_parent"
@@ -66,10 +51,4 @@
         android:text = "Send Collected Data"
         />
 
-    <TextView
-        android:layout_width = "match_parent"
-        android:layout_height = "wrap_content"
-        android:layout_marginTop="30dp"
-        android:text="@string/instructions"
-        />
 </LinearLayout>
