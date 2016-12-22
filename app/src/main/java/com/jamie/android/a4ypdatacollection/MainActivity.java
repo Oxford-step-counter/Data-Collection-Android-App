@@ -102,6 +102,21 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
 
     }
 
+    private void createNotesFile(File filesDir) {
+
+        try {
+            File noteFile = new File(filesDir + "/notes.txt");
+            FileOutputStream outputStream = new FileOutputStream(noteFile);
+            OutputStreamWriter out = new OutputStreamWriter(outputStream);
+            out.append(notes);
+            out.flush();
+            out.close();
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void createMetadataFile(File filesDir) {
 
         String output = "";
@@ -280,6 +295,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
                 String zipName = fileName + "." + Utils.formatDate(c.getTime()) + ".zip";
 
                 createMetadataFile(filesDir);
+                createNotesFile(filesDir);
 
                 File[] listOfFiles = filesDir.listFiles();
                 File zip = Utils.zip(Arrays.asList(listOfFiles), filesDir.getAbsolutePath() + "/" + zipName);
