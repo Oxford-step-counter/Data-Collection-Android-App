@@ -3,6 +3,7 @@ package com.jamie.android.a4ypdatacollection;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -10,12 +11,15 @@ import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
+import android.text.Layout;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -32,10 +36,14 @@ import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity implements BluetoothModule.BluetoothModuleCallback{
 
+    final Context context = this;
+
     private Button mStartCollectionButton;
     private Button mStopCollectionButton;
     private Button mSendDataButton;
     private Button mConnectButton;
+    private Button mNotesEditButton;
+
     private EditText mFileNameEditText;
 
     private SensorLogger mLogger;
@@ -45,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
     private String[] sensors;
 
     private String fileName;
+    private String notes;
 
     private Handler mConnectedHandler;
     private ProgressDialog mConnectedDialog;
@@ -180,6 +189,51 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
     }
 
     private void setUpButtons() {
+
+        //Wire up notes editing button
+        mNotesEditButton = (Button) findViewById(R.id.notes_input_button);
+        mNotesEditButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Kick off a text input dialog.
+
+                // Inflate dialog layout
+                LayoutInflater li = LayoutInflater.from(context);
+                View promptView = li.inflate(R.layout.note_dialog, null);
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+                alertDialogBuilder.setView(promptView);
+
+                // Wire up edit text handling.
+                final EditText userNotes = (EditText) promptView.findViewById(R.id.notes_dialog_edit_text);
+                if (notes != null) {
+                    userNotes.setText(notes);
+                }
+
+                alertDialogBuilder
+                        .setCancelable(false)
+                        .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // Save data from edit text
+                                notes = userNotes.getText().toString();
+                                Log.d(LOG, notes);
+                                dialog.dismiss();
+                            }
+                        })
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // Do nothing
+                                dialog.cancel();
+                            }
+                        });
+
+                AlertDialog alert = alertDialogBuilder.create();
+                alert.show();
+            }
+        });
+
+
         //Wire up start data collection button
         mStartCollectionButton = (Button) findViewById(R.id.start_service_button);
         mStartCollectionButton.setEnabled(false);
