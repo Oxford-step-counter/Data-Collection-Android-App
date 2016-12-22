@@ -99,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
         mSendDataButton.setEnabled(false);
         mStartCollectionButton.setEnabled(true);
         mStopCollectionButton.setEnabled(false);
+        notes = null;
 
     }
 
@@ -294,13 +295,17 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
                 Calendar c = Calendar.getInstance();
                 String zipName = fileName + "." + Utils.formatDate(c.getTime()) + ".zip";
 
+                //Create supplementary files
                 createMetadataFile(filesDir);
-                createNotesFile(filesDir);
+                if (notes != null) {
+                    createNotesFile(filesDir);
+                }
 
+                //Get list of files + zip these.
                 File[] listOfFiles = filesDir.listFiles();
                 File zip = Utils.zip(Arrays.asList(listOfFiles), filesDir.getAbsolutePath() + "/" + zipName);
 
-                //Remove csv files.
+                //Remove created files.
                 for (File f : listOfFiles) {
                     f.delete();
                 }
