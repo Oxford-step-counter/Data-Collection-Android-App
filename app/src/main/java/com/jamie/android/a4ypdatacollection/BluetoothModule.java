@@ -50,6 +50,7 @@ public class BluetoothModule {
 
     public interface BluetoothModuleCallback {
         void onDisconnect();
+        void onUpdate(int leftState, int rightState);
     }
 
     public BluetoothModule(Context context, BluetoothModuleCallback callback) {
@@ -228,6 +229,8 @@ public class BluetoothModule {
                 leftState = 0;
         }
 
+
+
         //Write to file.
         if (mActive) {
             String line = Long.toString(ts) + "," + Integer.toString(rightState) + "," + Integer.toString(leftState) + "\n";
@@ -240,6 +243,7 @@ public class BluetoothModule {
             }
         }
 
+        callback.onUpdate(leftState, rightState);
     }
 
 

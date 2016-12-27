@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -45,6 +46,9 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
     private Button mNotesEditButton;
 
     private EditText mFileNameEditText;
+
+    private TextView mLeftFootStateTextview;
+    private TextView mRightFootStateTextView;
 
     private SensorLogger mLogger;
     private SensorManager sensorManager;
@@ -91,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
         setUpSensors();
         setUpEditText();
         setUpButtons();
+        setUpTextViews();
     }
 
     //Function to reset state --> create new Logger object.
@@ -174,6 +179,12 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
             sensors[k] = Utils.mapSensorType(i);
             k++;
         }
+    }
+
+    private void setUpTextViews() {
+
+        mLeftFootStateTextview = (TextView) findViewById(R.id.left_foot_status);
+        mRightFootStateTextView = (TextView) findViewById(R.id.right_foot_status);
     }
 
     private void setUpEditText() {
@@ -375,10 +386,27 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
                 mStartCollectionButton.setEnabled(false);
                 mStopCollectionButton.setEnabled(false);
                 mSendDataButton.setEnabled(false);
+                mLeftFootStateTextview.setText("-");
+                mRightFootStateTextView.setText("-");
             }
         });
         Toast toast = Toast.makeText(this, "RFduino disconnected", Toast.LENGTH_SHORT);
         toast.show();
+    }
+
+    @Override
+    public void onUpdate(int leftState, final int rightState) {
+
+        final String leftStateStr = leftState == 1 ? "Up" : "Down";
+        final String rightStateStr = rightState == 1 ? "Up" : "Down";
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mLeftFootStateTextview.setText(leftStateStr);
+                mRightFootStateTextView.setText(rightStateStr);
+            }
+        });
     }
 
     private class FileUpload extends AsyncTask<String, Void, String> {
