@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.InterfaceAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Calendar;
@@ -22,6 +23,22 @@ import java.util.zip.ZipOutputStream;
  * Created by Jamie Brynes on 10/6/2016.
  */
 public class Utils {
+
+
+    public static String decodeReturnCode(int returnCode) {
+
+        if (returnCode >= 200 && returnCode < 300) {
+            return "OK - " + Integer.toString(returnCode);
+        }
+        else if (returnCode >= 400 && returnCode <500){
+            return "Client Error - " + Integer.toString(returnCode);
+        }
+        else if (returnCode >= 500) {
+            return "Server Error - " + Integer.toString(returnCode);
+        }
+
+        return "Return Code: " + Integer.toString(returnCode);
+    }
 
 
     //Returns string mapping to sensor type as listed in SensorLogger.java

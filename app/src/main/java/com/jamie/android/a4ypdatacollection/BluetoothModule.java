@@ -108,8 +108,6 @@ public class BluetoothModule {
             Log.e(TAG, "Unable to start file output");
             e.printStackTrace();
         }
-
-        mActive = true;
         setUpRead();
 
     }
@@ -177,7 +175,7 @@ public class BluetoothModule {
         mReadState = new Runnable() {
             @Override
             public void run() {
-                if (mConnected && mActive){
+                if (mConnected){
                     mReadHandler.postDelayed(this, 10);
                     if(mBluetoothGatt != null && mCharacteristic != null) {
                         mBluetoothGatt.readCharacteristic(mCharacteristic);

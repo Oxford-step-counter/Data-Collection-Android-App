@@ -14,15 +14,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.telephony.TelephonyManager;
 import android.text.Editable;
-import android.text.Layout;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
 
     private TextView mLeftFootStateTextview;
     private TextView mRightFootStateTextView;
+
+    private Chronometer mChronometer;
 
     private SensorLogger mLogger;
     private SensorManager sensorManager;
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
         setUpEditText();
         setUpButtons();
         setUpTextViews();
+        setUpChronometer();
     }
 
     //Function to reset state --> create new Logger object.
@@ -179,6 +181,12 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
             sensors[k] = Utils.mapSensorType(i);
             k++;
         }
+    }
+
+    private void setUpChronometer() {
+
+        mChronometer = (Chronometer) findViewById(R.id.chronometer);
+
     }
 
     private void setUpTextViews() {
@@ -269,13 +277,15 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
             public void onClick(View v) {
                 mStopCollectionButton.setEnabled(true);
                 mStartCollectionButton.setEnabled(false);
+
                 try {
                     mLogger = new SensorLogger(MainActivity.this, sensors);
                 } catch (IOException e) {
                     Log.e(LOG, "Cannot create SensorLogger object.");
                 }
+                mChronometer.start();
                 mLogger.start();
-                mBtModule.start();
+                mBtModule.setmActive(true);
             }
         });
 
@@ -288,6 +298,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
                 mStartCollectionButton.setEnabled(true);
                 mStopCollectionButton.setEnabled(false);
                 mSendDataButton.setEnabled(true);
+                mChronometer.stop();
                 mLogger.stop();
                 mBtModule.stop();
 
@@ -352,6 +363,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
                             if (mBtModule.getConnecting()) {
                                 mConnectedHandler.postDelayed(this, 500);
                             } else {
+                                mBtModule.start();
                                 mConnectedDialog.dismiss();
                                 if (!mBtModule.getConnected()) {
                                     Toast toast = Toast.makeText(MainActivity.this, "Unable to connect", Toast.LENGTH_SHORT);
@@ -413,6 +425,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
 
         private ProgressDialog progressDialog;
         private File file;
+        private int returnCode;
 
         @Override
         protected String doInBackground(String... params) {
@@ -420,7 +433,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
             String fileURI = params[0];
 
             file = new File(fileURI);
-            int serverReturnCode = Utils.uploadFile(file, SERVER_URL);
+            returnCode = Utils.uploadFile(file, SERVER_URL);
 
             return "complete";
         }
@@ -437,6 +450,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
         protected void onPostExecute(String result) {
             progressDialog.dismiss();
             file.delete();
+
+            Toast.makeText(context, "Upload completed: server returned " + Utils.decodeReturnCode(returnCode), Toast.LENGTH_SHORT).show();
         }
 
 
