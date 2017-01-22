@@ -175,7 +175,7 @@ public class BluetoothModule {
         mReadState = new Runnable() {
             @Override
             public void run() {
-                if (mConnected){
+                if (mConnected && mActive){
                     mReadHandler.postDelayed(this, 10);
                     if(mBluetoothGatt != null && mCharacteristic != null) {
                         mBluetoothGatt.readCharacteristic(mCharacteristic);

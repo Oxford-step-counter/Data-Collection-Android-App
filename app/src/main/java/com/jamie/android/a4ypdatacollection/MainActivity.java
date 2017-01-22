@@ -10,6 +10,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -283,9 +284,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
                 } catch (IOException e) {
                     Log.e(LOG, "Cannot create SensorLogger object.");
                 }
+                mChronometer.setBase(SystemClock.elapsedRealtime());
                 mChronometer.start();
                 mLogger.start();
-                mBtModule.setmActive(true);
+                mBtModule.start();
             }
         });
 
