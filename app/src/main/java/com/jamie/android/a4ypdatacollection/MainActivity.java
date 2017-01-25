@@ -39,6 +39,9 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
 
     final Context context = this;
 
+    private boolean zipExists;
+    private File zip;
+
     private Button mStartCollectionButton;
     private Button mStopCollectionButton;
     private Button mSendDataButton;
@@ -85,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
         //Get name data.
         SharedPreferences sp = getPreferences(MODE_PRIVATE);
         fileName = sp.getString(SP_FILE_NAME_KEY, "");
-
+        zipExists = false;
 
         getPermissions();
 
@@ -287,6 +290,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
                 mChronometer.setBase(SystemClock.elapsedRealtime());
                 mChronometer.start();
                 mLogger.start();
+                mBtModule.setmActive(true);
                 mBtModule.start();
             }
         });
@@ -314,32 +318,30 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
             @Override
             public void onClick(View v) {
 
+                if (!zipExists) {
 
-                //Create name of zip: UUID + timestamp.
-                Calendar c = Calendar.getInstance();
-                String zipName = fileName + "." + Utils.formatDate(c.getTime()) + ".zip";
+                    //Create name of zip: UUID + timestamp.
+                    Calendar c = Calendar.getInstance();
+                    String zipName = fileName + "." + Utils.formatDate(c.getTime()) + ".zip";
 
-                //Create supplementary files
-                createMetadataFile(filesDir);
-                if (notes != null) {
-                    createNotesFile(filesDir);
+                    //Create supplementary files
+                    createMetadataFile(filesDir);
+                    if (notes != null) {
+                        createNotesFile(filesDir);
+                    }
+
+                    //Get list of files + zip these.
+                    File[] listOfFiles = filesDir.listFiles();
+                    for (File file : listOfFiles) {
+                        Log.d(LOG,file.getAbsolutePath());
+                    }
+                    zip = Utils.zip(Arrays.asList(listOfFiles), filesDir.getAbsolutePath() + "/" + zipName);
+                    zipExists = true;
                 }
-
-                //Get list of files + zip these.
-                File[] listOfFiles = filesDir.listFiles();
-                File zip = Utils.zip(Arrays.asList(listOfFiles), filesDir.getAbsolutePath() + "/" + zipName);
-
-                //Remove created files.
-                for (File f : listOfFiles) {
-                    f.delete();
-                }
-                Log.d(LOG, "Zip file created!");
-
 
                 //Upload file to server.
                 FileUpload fileUpload = new FileUpload();
                 fileUpload.execute(zip.getAbsolutePath());
-                resetState();
             }
         });
 
@@ -450,9 +452,18 @@ public class MainActivity extends AppCompatActivity implements BluetoothModule.B
 
         @Override
         protected void onPostExecute(String result) {
-            progressDialog.dismiss();
-            file.delete();
 
+            // Variable state changes based on return code
+            if (returnCode == 200) {
+                // Successful upload
+                File[] listOfFiles = filesDir.listFiles();
+                for (File f : listOfFiles) {
+                    f.delete();
+                }
+                zipExists = false;
+                resetState();
+            }
+            progressDialog.dismiss();
             Toast.makeText(context, "Upload completed: server returned " + Utils.decodeReturnCode(returnCode), Toast.LENGTH_SHORT).show();
         }
 

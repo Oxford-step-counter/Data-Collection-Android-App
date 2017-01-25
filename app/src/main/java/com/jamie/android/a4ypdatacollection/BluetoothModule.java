@@ -100,6 +100,7 @@ public class BluetoothModule {
 
     public void start(){
         //Set up IO
+        Log.d(TAG, "Starting Bluetooth Collection.");
         try {
             File file = new File(ctx.getExternalFilesDir(null) + "/" + FILE_NAME);
             mFos = new FileOutputStream(file);
@@ -176,6 +177,7 @@ public class BluetoothModule {
             @Override
             public void run() {
                 if (mConnected && mActive){
+                    Log.d(TAG, "Starting read lel");
                     mReadHandler.postDelayed(this, 10);
                     if(mBluetoothGatt != null && mCharacteristic != null) {
                         mBluetoothGatt.readCharacteristic(mCharacteristic);
