@@ -1,0 +1,21 @@
+# gradle stuff
+/.gradle/
+/gradle/
+.gradle
+gradle-app.setting
+gradlew*
+
+# builds
+/bin/
+/build/
+/app/
+
+# Eclipse stuff
+/.settings/
+.project
+.classpath
+
+# Android studio stuff
+.idea/
+local.properties
+*.iml
